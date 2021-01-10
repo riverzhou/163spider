@@ -181,6 +181,7 @@ class MainWindow(QMainWindow):
         self.currentURL  = ''
         self.initialURL  = ''
         self.prefixCheck = ''
+        self.dirSave     = ''
         self.flagStart   = False
         self.count       = 0
         self.bgTimer     = QTimer(self)
@@ -212,6 +213,7 @@ class MainWindow(QMainWindow):
         self.initialURL = self.control.initialURL
         self.currentURL = self.control.initialURL
         self.prefixCheck = self.control.prefixCheck
+        self.dirSave    = self.control.dirSave
         self.webview.load(QUrl(self.currentURL))
 
     def create_tab(self,webview):
@@ -294,10 +296,10 @@ class MainWindow(QMainWindow):
 
     def save(self,html):
         global dirSave
-        if not self.currentURL.startswith(prefixCheck):
+        if not self.currentURL.startswith(self.prefixCheck):
             return
         filename = self.currentURL.split(saveTag)[1].strip('/') + '.html'
-        with open(dirSave+filename, 'w', encoding='utf-8') as f:
+        with open(self.dirSave+filename, 'w', encoding='utf-8') as f:
             f.write(html)
 
 if __name__ == '__main__':
