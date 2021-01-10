@@ -12,6 +12,15 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
+
+flagShow        = False
+
+username        = 'jjjttxy'
+username        = 'erxianzhongren'
+username        = 'qingzhuwuyan'
+username        = 'wsszzh1a'
+username        = 'ghjiaz0226'
+username        = 'a4367007'
 username        = 'hshwh212'
 #username        = 'riverzhou2000'
 
@@ -20,15 +29,16 @@ username        = 'hshwh212'
 initialURL      = 'http://{}.blog.163.com/blog/'.format(username)
 prefixCheck     = 'http://{}.blog.163.com/blog/static/'.format(username)
 
-maxRetry        = 10
+maxRetry        = 20
 interVal        = 1
-firstDelay      = 5
+#firstDelay     = 5
+loadDelay       = 3
 
 dictURLHistory  = {initialURL:maxRetry}
 listURLTodo     = []
 
-logFileName     = '163spider.log'
-dirSave         = os.getcwd()+'/save/'
+logFileName     = '163spider.{}.log'.format(username)
+dirSave         = os.getcwd()+'/{}.save/'.format(username)
 
 if not os.path.exists(dirSave):
     os.makedirs(dirSave)
@@ -69,7 +79,8 @@ class controlWindow(QDialog):
         self.setWindowModality(Qt.NonModal)
         self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)
-        self.setWindowFlag(Qt.WindowStaysOnTopHint)
+        if flagShow:
+            self.setWindowFlag(Qt.WindowStaysOnTopHint)
 
         self.layout = QGridLayout()
         self.setLayout(self.layout)
@@ -89,7 +100,6 @@ class controlWindow(QDialog):
         self.layout.addWidget(self.textBrowser, 0, 0, 1, 9)
         self.layout.addWidget(self.btnStart, 1, 0)
         self.layout.addWidget(self.btnStop, 1, 1)
-
 
         QMetaObject.connectSlotsByName(self)
 
@@ -136,9 +146,10 @@ class MainWindow(QMainWindow):
         self.flagStart   = False
         self.count       = 0
 
-        self.setWindowTitle('QWebEngine')
-        self.showMaximized()
-        #self.setWindowFlags(Qt.FramelessWindowHint)
+        if flagShow:
+            self.setWindowTitle('QWebEngine')
+            self.showMaximized()
+            #self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.tabWidget = QTabWidget()
         #self.tabWidget.setTabShape(QTabWidget.Triangular)
@@ -163,7 +174,8 @@ class MainWindow(QMainWindow):
 
         self.Layout = QHBoxLayout(tab)
         self.Layout.setContentsMargins(0, 0, 0, 0)
-        self.Layout.addWidget(webview)
+        if flagShow:
+            self.Layout.addWidget(webview)
 
         self.dictWebview[tab] = webview
         self.listTab.append(tab)
@@ -177,14 +189,14 @@ class MainWindow(QMainWindow):
             self.close()
 
     def loadFinished(self):
-        global firstDelay
-        #if self.count == 0:
-        #    sleep(firstDelay)
+        global maxRetry, dictURLHistory, loadDelay
+        sleep((maxRetry - dictURLHistory[self.currentURL] + 1 ) * loadDelay)
         self.webview.page().toHtml(self.procHTML)
 
     def procHTML(self, html):
         global listURLTodo, dictURLHistory, prefixCheck, maxRetry, interVal
         if not self.flagStart:
+            self.control.printf('Initial Page Loaded.')
             return
         self.save(html)
         self.control.printf('= '+self.currentURL)
@@ -241,5 +253,8 @@ if __name__ == '__main__':
     os.environ['QT_AUTO_SCREEN_SCALE_FACTOR'] = '1'
     app = QApplication(sys.argv)
     window = MainWindow()
-    window.show()
+    if flagShow:
+        window.show()
+    else:
+        window.hide()
     sys.exit(app.exec_())
