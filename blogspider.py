@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import sys 
+import sys
 import os
 
 from time import sleep
@@ -19,6 +19,7 @@ prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
 
 maxRetry        = 10
 interVal        = 1
+firstDelay      = 5
 
 dictURLHistory  = {initialURL:maxRetry}
 listURLTodo     = []
@@ -172,6 +173,9 @@ class MainWindow(QMainWindow):
             self.close()
 
     def loadFinished(self):
+        global firstDelay
+        if self.count == 0:
+            sleep(firstDelay)
         self.webview.page().toHtml(self.procHTML)
 
     def procHTML(self, html):
