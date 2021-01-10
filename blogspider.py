@@ -3,7 +3,6 @@
 import sys
 import os
 
-#from time import sleep
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -12,22 +11,22 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
-flagShow = True
+flagShow = False
 
 listUser = [
-'jjjttxy',
+'riverzhou2000',
+'hshwh212',
 'erxianzhongren',
 'qingzhuwuyan',
 'wsszzh1a',
 'ghjiaz0226',
 'a4367007',
-'hshwh212',
-'riverzhou2000',
 ]
 
 #initialURL     = 'https://ie.icoa.cn'
 initialURL      = r'http://{}.blog.163.com/blog/'
 prefixCheck     = r'http://{}.blog.163.com/blog/static/'
+saveTag         = 'static'
 
 maxRetry        = 20
 interVal        = 0
@@ -58,19 +57,6 @@ class WebEngineView(QWebEngineView):
         new_webview = WebEngineView(self.mainwindow)
         self.mainwindow.create_tab(new_webview)
         return new_webview
-
-class BackGroundThread(QThread):
-    _signal = pyqtSignal(int) #定义信号类型为整型
-
-    def __init__(self, control):
-        super().__init__()
-        self.control = control
-        self.mainwindow = None
-
-    def run(self):
-        self.mainwindow = QMainWindow()
-        #self.mainwindow.show()
-
 
 class controlWindow(QDialog):
 
@@ -155,7 +141,7 @@ class controlWindow(QDialog):
             self.fLog.flush()
 
     def printf(self,mypstr):
-        info = timeNow()+' =>| ' + mypstr+'\n'
+        info = timeNow()+' =>| '+ mypstr+'\n'
         self.logWrite(info)
         self.textBrowser.setPlainText(self.textBrowser.toPlainText()+info)
         self.textBrowser.moveCursor(self.textBrowser.textCursor().End)  # 光标移到最后，这样就会自动显示出来
@@ -193,7 +179,7 @@ class MainWindow(QMainWindow):
         self.prefixCheck = ''
         self.flagStart   = False
         self.count       = 0
-        self.bgTimer     = None
+        self.bgTimer     = QTimer(self)
 
         if flagShow:
             self.setWindowTitle('QWebEngine')
@@ -248,7 +234,6 @@ class MainWindow(QMainWindow):
     def loadFinished(self):
         #self.control.printf('loadFinished')
         global maxRetry, dictURLHistory, loadDelay
-        self.bgTimer = QTimer(self)
         self.bgTimer.singleShot((maxRetry - dictURLHistory[self.currentURL] + 1 ) * loadDelay * 1000, self.getHTML)
 
     def getHTML(self):
@@ -299,7 +284,6 @@ class MainWindow(QMainWindow):
             self.control.printf('Todo List Empty !!!')
             return
 
-        #sleep(interVal)
         self.currentURL = listURLTodo[-1]
         listURLTodo.pop()
         self.webview.load(QUrl(self.currentURL))
@@ -308,7 +292,7 @@ class MainWindow(QMainWindow):
         global dirSave
         if not self.currentURL.startswith(prefixCheck):
             return
-        filename = self.currentURL.split('static')[1].strip('/') + '.html'
+        filename = self.currentURL.split(saveTag)[1].strip('/') + '.html'
         with open(dirSave+filename, 'w', encoding='utf-8') as f:
             f.write(html)
 
