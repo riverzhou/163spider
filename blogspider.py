@@ -12,15 +12,17 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
-#initialURL      = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778/'
+#initialURL     = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778/'
 #initialURL     = 'https://ie.icoa.cn'
-initialURL     = 'http://riverzhou2000.blog.163.com'
+initialURL      = 'http://riverzhou2000.blog.163.com'
 prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
 
-dictURLHistory  = {initialURL:3}
-listURLTodo     = []
 maxRetry        = 10
 interVal        = 1
+
+dictURLHistory  = {initialURL:maxRetry}
+listURLTodo     = []
+
 logFileName     = '163spider.log'
 dirSave         = os.getcwd()+'/save/'
 
@@ -202,13 +204,16 @@ class MainWindow(QMainWindow):
                 listURLTodo.insert(0,self.currentURL)
         else:
             dictURLHistory[self.currentURL] = -1
+            self.count += 1
+            self.control.printf('--- [{}]'.format(self.count))
+
         if len(listURLNew) > 0:
             listURLTodo += listURLNew
+
         if len(listURLTodo) == 0:
             self.control.printf('Todo List Empty !!!')
             return
-        self.count += 1
-        self.control.printf('--- [{}]'.format(self.count))
+
         sleep(interVal)
         self.currentURL = listURLTodo[-1]
         listURLTodo.pop()
