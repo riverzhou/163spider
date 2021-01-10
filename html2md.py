@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from html2text import html2text, HTML2Text
 
 listUser = [
-    'river',
+    'riverzhou2000',
 ]
 
 def procHTML(htmlDir,mdDir,htmlFileName):
@@ -74,8 +74,9 @@ def procHTML(htmlDir,mdDir,htmlFileName):
 
     title = newMD[0].lstrip('#').strip()
     date = newMD[2].split()[0].strip()
-    mdFileName = date+'_'+title+'.md'
-    mdFileName = re.sub('[\/:*?"<>|]','-',mdFileName)
+    tag = newMD[4].lstrip('标签：').strip()
+    mdFileName = date+'_'+tag+'_'+title+'.md'
+    mdFileName = re.sub(r'[\\/:*?"<>|\r\n\- ]+', "_", mdFileName)
     with open(mdDir+mdFileName, 'w', encoding='utf-8') as wf:
         wf.write('\n'.join(newMD))
 
