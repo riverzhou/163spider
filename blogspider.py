@@ -12,12 +12,12 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
-initialURL      = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778/'
+#initialURL      = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778/'
 #initialURL     = 'https://ie.icoa.cn'
-#initialURL     = 'http://riverzhou2000.blog.163.com'
+initialURL     = 'http://riverzhou2000.blog.163.com'
 prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
 
-dictURLHistory  = {}
+dictURLHistory  = {initialURL:3}
 listURLTodo     = []
 maxRetry        = 10
 interVal        = 1
@@ -199,7 +199,7 @@ class MainWindow(QMainWindow):
             self.control.printf('No URL in Page ! Remain Retry: {}'.format(dictURLHistory[self.currentURL]))
             if dictURLHistory[self.currentURL] > 0:
                 dictURLHistory[self.currentURL] -= 1
-            listURLTodo.insert(0,self.currentURL)
+                listURLTodo.insert(0,self.currentURL)
         else:
             dictURLHistory[self.currentURL] = -1
         if len(listURLNew) > 0:
@@ -216,6 +216,8 @@ class MainWindow(QMainWindow):
 
     def save(self,html):
         global dirSave
+        if not self.currentURL.startswith(prefixCheck):
+            return
         filename = self.currentURL.split('static')[1].strip('/') + '.html'
         with open(dirSave+filename, 'w', encoding='utf-8') as f:
             f.write(html)
