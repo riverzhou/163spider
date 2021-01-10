@@ -20,7 +20,7 @@ prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
 dictURLHistory  = {}
 listURLTodo     = []
 maxRetry        = 10
-interVal        = 5
+interVal        = 1
 logFileName     = '163spider.log'
 dirSave         = os.getcwd()+'/save/'
 
@@ -127,6 +127,7 @@ class MainWindow(QMainWindow):
         self.listTab     = []
         self.currentURL  = initialURL
         self.flagStart   = False
+        self.count       = 0
 
         self.setWindowTitle('QWebEngine')
         self.showMaximized()
@@ -206,7 +207,8 @@ class MainWindow(QMainWindow):
         if len(listURLTodo) == 0:
             self.control.printf('Todo List Empty !!!')
             return
-        self.control.printf('---')
+        self.count += 1
+        self.control.printf('--- [{}]'.format(self.count))
         sleep(interVal)
         self.currentURL = listURLTodo[-1]
         listURLTodo.pop()
