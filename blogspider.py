@@ -142,7 +142,7 @@ class controlWindow(QDialog):
             self.fLog.flush()
 
     def printf(self,mypstr):
-        if len(self.listLog) > 1000:
+        if len(self.listLog) > 500:
             self.listLog = self.listLog[100:]
         info = timeNow()+' =>| '+ mypstr+'\n'
         self.logWrite(info)
@@ -210,6 +210,7 @@ class MainWindow(QMainWindow):
         self.loadFinished()
 
     def initLoad(self):
+        self.count = 0
         self.initialURL = self.control.initialURL
         self.currentURL = self.control.initialURL
         self.prefixCheck = self.control.prefixCheck
