@@ -3,4 +3,4 @@
 *.log
 save
 save_*
-*.save
+save.*

@@ -3,7 +3,7 @@
 import sys
 import os
 
-from time import sleep
+#from time import sleep
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -12,36 +12,32 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
+flagShow = True
 
-flagShow        = False
+listUser = [
+'jjjttxy',
+'erxianzhongren',
+'qingzhuwuyan',
+'wsszzh1a',
+'ghjiaz0226',
+'a4367007',
+'hshwh212',
+'riverzhou2000',
+]
 
-username        = 'jjjttxy'
-username        = 'erxianzhongren'
-username        = 'qingzhuwuyan'
-username        = 'wsszzh1a'
-username        = 'ghjiaz0226'
-username        = 'a4367007'
-username        = 'hshwh212'
-#username        = 'riverzhou2000'
-
-#initialURL     = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778'
 #initialURL     = 'https://ie.icoa.cn'
-initialURL      = 'http://{}.blog.163.com/blog/'.format(username)
-prefixCheck     = 'http://{}.blog.163.com/blog/static/'.format(username)
+initialURL      = r'http://{}.blog.163.com/blog/'
+prefixCheck     = r'http://{}.blog.163.com/blog/static/'
 
 maxRetry        = 20
-interVal        = 1
-#firstDelay     = 5
-loadDelay       = 3
+interVal        = 0
+loadDelay       = 1
 
-dictURLHistory  = {initialURL:maxRetry}
+dictURLHistory  = {}
 listURLTodo     = []
 
-logFileName     = '163spider.{}.log'.format(username)
-dirSave         = os.getcwd()+'/{}.save/'.format(username)
-
-if not os.path.exists(dirSave):
-    os.makedirs(dirSave)
+logFileName     = r'163spider.{}.log'
+dirSave         = os.getcwd()+r'/save.{}/'
 
 def timeNow():
     return datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f')
@@ -51,8 +47,7 @@ class WebEngineView(QWebEngineView):
     def __init__(self,mainwindow):
         super().__init__()
         self.mainwindow = mainwindow
-
-        self.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)      #支持视频播放
+        #self.settings().setAttribute(QWebEngineSettings.PluginsEnabled, True)      #支持视频播放
         self.page().windowCloseRequested.connect(self.on_windowCloseRequested)     #页面关闭请求
 
     def on_windowCloseRequested(self):
@@ -64,23 +59,37 @@ class WebEngineView(QWebEngineView):
         self.mainwindow.create_tab(new_webview)
         return new_webview
 
+class BackGroundThread(QThread):
+    _signal = pyqtSignal(int) #定义信号类型为整型
+
+    def __init__(self, control):
+        super().__init__()
+        self.control = control
+        self.mainwindow = None
+
+    def run(self):
+        self.mainwindow = QMainWindow()
+        #self.mainwindow.show()
+
+
 class controlWindow(QDialog):
 
-    def __init__(self, mainwindow):
+    def __init__(self):
         super().__init__()
 
-        self.mainwindow     = mainwindow
-
-        self.fLog = None
-        self.initLog()
+        self.initialURL     = ''
+        self.prefixCheck    = ''
+        self.logFileName    = ''
+        self.dirSave        = ''
+        self.username       = ''
+        self.fLog           = None
 
         self.resize(800,600)
         self.setWindowTitle('Control')
         self.setWindowModality(Qt.NonModal)
         self.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
         self.setWindowFlag(Qt.WindowMinimizeButtonHint)
-        if flagShow:
-            self.setWindowFlag(Qt.WindowStaysOnTopHint)
+        self.setWindowFlag(Qt.WindowStaysOnTopHint)
 
         self.layout = QGridLayout()
         self.setLayout(self.layout)
@@ -88,6 +97,13 @@ class controlWindow(QDialog):
         self.textBrowser = QTextEdit()
         self.textBrowser.setFocusPolicy(Qt.NoFocus) 
         self.textBrowser.setObjectName('textBrowser')
+
+        self.selectBox = QComboBox()
+        self.selectBox.addItems(listUser)
+
+        self.btnInit = QToolButton()
+        self.btnInit.setText('初始')
+        self.btnInit.setObjectName('btnInit')
 
         self.btnStart = QToolButton()
         self.btnStart.setText('开始')
@@ -98,8 +114,12 @@ class controlWindow(QDialog):
         self.btnStop.setObjectName('btnStop')
 
         self.layout.addWidget(self.textBrowser, 0, 0, 1, 9)
-        self.layout.addWidget(self.btnStart, 1, 0)
-        self.layout.addWidget(self.btnStop, 1, 1)
+        self.layout.addWidget(self.selectBox, 1, 0)
+        self.layout.addWidget(self.btnInit, 1, 1)
+        self.layout.addWidget(self.btnStart, 1, 2)
+        self.layout.addWidget(self.btnStop, 1, 3)
+
+        self.mainwindow = MainWindow(self)
 
         QMetaObject.connectSlotsByName(self)
 
@@ -107,9 +127,27 @@ class controlWindow(QDialog):
         self.mainwindow.close()
         super().reject()
 
+    def initUser(self):
+        self.initialURL     = initialURL.format(self.username).rstrip('/')
+        self.prefixCheck    = prefixCheck.format(self.username)
+        self.logFileName    = logFileName.format(self.username)
+        self.dirSave        = dirSave.format(self.username)
+
+        dictURLHistory[self.initialURL] = maxRetry
+
+        self.initLog()
+        self.checkDir()
+
+    def checkDir(self):
+        if not os.path.exists(self.dirSave):
+            os.makedirs(self.dirSave)
+
     def initLog(self):
-        global logFileName
-        self.fLog = open(logFileName, 'a', encoding='utf-8')
+        self.fLog = open(self.logFileName, 'a', encoding='utf-8')
+
+    def closeLog(self):
+        if self.fLog is not None:
+            self.fLog.close()
 
     def logWrite(self, info):
         if self.fLog is not None:
@@ -124,27 +162,38 @@ class controlWindow(QDialog):
         QApplication.processEvents()  # 一定加上这个功能，不然有卡顿
 
     @pyqtSlot()
+    def on_btnInit_clicked(self):
+        self.printf('Init ...')
+        self.username = self.selectBox.currentText()
+        self.printf('Current User is {}'.format(self.username))
+        self.initUser()
+        self.mainwindow.initLoad()
+
+    @pyqtSlot()
     def on_btnStart_clicked(self):
         self.printf('Start ...')
-        self.mainwindow.flagStart = True
-        #self.mainwindow.webview.reload()
-        self.mainwindow.loadFinished()
+        self.mainwindow.startCrawl()
 
     @pyqtSlot()
     def on_btnStop_clicked(self):
         self.printf('Stop ...')
-        self.mainwindow.flagStart = False
+        self.mainwindow.stopCrawl()
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, control):
         super().__init__()
+
+        self.control = control
 
         self.dictWebview = {}
         self.listTab     = []
-        self.currentURL  = initialURL
+        self.currentURL  = ''
+        self.initialURL  = ''
+        self.prefixCheck = ''
         self.flagStart   = False
         self.count       = 0
+        self.bgTimer     = None
 
         if flagShow:
             self.setWindowTitle('QWebEngine')
@@ -152,7 +201,6 @@ class MainWindow(QMainWindow):
             #self.setWindowFlags(Qt.FramelessWindowHint)
 
         self.tabWidget = QTabWidget()
-        #self.tabWidget.setTabShape(QTabWidget.Triangular)
         self.tabWidget.setDocumentMode(True)
         self.tabWidget.setMovable(True)
         self.tabWidget.setTabsClosable(True)
@@ -162,10 +210,19 @@ class MainWindow(QMainWindow):
         self.webview = WebEngineView(self)
         self.webview.loadFinished.connect(self.loadFinished)
         self.create_tab(self.webview)
-        self.webview.load(QUrl(self.currentURL))
 
-        self.control = controlWindow(self)
-        self.control.show()
+    def stopCrawl(self):
+        self.flagStart = False
+
+    def startCrawl(self):
+        self.flagStart = True
+        self.loadFinished()
+
+    def initLoad(self):
+        self.initialURL = self.control.initialURL
+        self.currentURL = self.control.initialURL
+        self.prefixCheck = self.control.prefixCheck
+        self.webview.load(QUrl(self.currentURL))
 
     def create_tab(self,webview):
         tab = QWidget()
@@ -189,14 +246,19 @@ class MainWindow(QMainWindow):
             self.close()
 
     def loadFinished(self):
+        #self.control.printf('loadFinished')
         global maxRetry, dictURLHistory, loadDelay
-        sleep((maxRetry - dictURLHistory[self.currentURL] + 1 ) * loadDelay)
+        self.bgTimer = QTimer(self)
+        self.bgTimer.singleShot((maxRetry - dictURLHistory[self.currentURL] + 1 ) * loadDelay * 1000, self.getHTML)
+
+    def getHTML(self):
+        #self.control.printf('getHTML')
         self.webview.page().toHtml(self.procHTML)
 
     def procHTML(self, html):
         global listURLTodo, dictURLHistory, prefixCheck, maxRetry, interVal
         if not self.flagStart:
-            self.control.printf('Initial Page Loaded.')
+            self.control.printf('Initial Page Loaded or Stopped.')
             return
         self.save(html)
         self.control.printf('= '+self.currentURL)
@@ -209,7 +271,8 @@ class MainWindow(QMainWindow):
             if url is None:
                 continue
             url = url.rstrip('/')
-            if url.startswith(prefixCheck):
+            #self.control.printf('* '+url)
+            if url.startswith(self.prefixCheck):
                 listURLAll.append(url)
                 if url not in dictURLHistory:
                     listURLNew.append(url)
@@ -236,7 +299,7 @@ class MainWindow(QMainWindow):
             self.control.printf('Todo List Empty !!!')
             return
 
-        sleep(interVal)
+        #sleep(interVal)
         self.currentURL = listURLTodo[-1]
         listURLTodo.pop()
         self.webview.load(QUrl(self.currentURL))
@@ -251,10 +314,7 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     os.environ['QT_AUTO_SCREEN_SCALE_FACTOR'] = '1'
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    if flagShow:
-        window.show()
-    else:
-        window.hide()
-    sys.exit(app.exec_())
+    a = QApplication(sys.argv)
+    w = controlWindow()
+    w.show()
+    sys.exit(a.exec_())
