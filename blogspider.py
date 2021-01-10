@@ -12,10 +12,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
+username        = 'hshwh212'
+#username        = 'riverzhou2000'
+
 #initialURL     = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778'
 #initialURL     = 'https://ie.icoa.cn'
-initialURL      = 'http://riverzhou2000.blog.163.com'
-prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
+initialURL      = 'http://{}.blog.163.com/blog/'.format(username)
+prefixCheck     = 'http://{}.blog.163.com/blog/static/'.format(username)
 
 maxRetry        = 10
 interVal        = 1
@@ -114,7 +117,8 @@ class controlWindow(QDialog):
     def on_btnStart_clicked(self):
         self.printf('Start ...')
         self.mainwindow.flagStart = True
-        self.mainwindow.webview.reload()
+        #self.mainwindow.webview.reload()
+        self.mainwindow.loadFinished()
 
     @pyqtSlot()
     def on_btnStop_clicked(self):
@@ -174,8 +178,8 @@ class MainWindow(QMainWindow):
 
     def loadFinished(self):
         global firstDelay
-        if self.count == 0:
-            sleep(firstDelay)
+        #if self.count == 0:
+        #    sleep(firstDelay)
         self.webview.page().toHtml(self.procHTML)
 
     def procHTML(self, html):
@@ -207,10 +211,11 @@ class MainWindow(QMainWindow):
             if dictURLHistory[self.currentURL] > 0:
                 dictURLHistory[self.currentURL] -= 1
                 listURLTodo.insert(0,self.currentURL)
+            self.control.printf('---')
         else:
             dictURLHistory[self.currentURL] = -1
-            self.count += 1
             self.control.printf('--- [{}]'.format(self.count))
+            self.count += 1
 
         if len(listURLNew) > 0:
             listURLTodo += listURLNew
