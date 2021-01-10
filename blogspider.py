@@ -69,6 +69,7 @@ class controlWindow(QDialog):
         self.dirSave        = ''
         self.username       = ''
         self.fLog           = None
+        self.listLog        = []
 
         self.resize(800,600)
         self.setWindowTitle('Control')
@@ -141,9 +142,12 @@ class controlWindow(QDialog):
             self.fLog.flush()
 
     def printf(self,mypstr):
+        if len(self.listLog) > 1000:
+            self.listLog = self.listLog[100:]
         info = timeNow()+' =>| '+ mypstr+'\n'
         self.logWrite(info)
-        self.textBrowser.setPlainText(self.textBrowser.toPlainText()+info)
+        self.listLog.append(info)
+        self.textBrowser.setPlainText(''.join(self.listLog))
         self.textBrowser.moveCursor(self.textBrowser.textCursor().End)  # 光标移到最后，这样就会自动显示出来
         QApplication.processEvents()  # 一定加上这个功能，不然有卡顿
 
