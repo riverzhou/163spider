@@ -188,7 +188,7 @@ class MainWindow(QMainWindow):
             url = str(link.get('href'))
             if url is None:
                 continue
-            url = url.rsplit('/')
+            url = url.rstrip('/')
             if url.startswith(prefixCheck):
                 listURLAll.append(url)
                 if url not in dictURLHistory:
