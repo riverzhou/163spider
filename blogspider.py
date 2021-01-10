@@ -12,7 +12,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWebEngineWidgets import *
 
-#initialURL     = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778/'
+#initialURL     = 'http://riverzhou2000.blog.163.com/blog/static/10540324820174112212778'
 #initialURL     = 'https://ie.icoa.cn'
 initialURL      = 'http://riverzhou2000.blog.163.com'
 prefixCheck     = 'http://riverzhou2000.blog.163.com/blog/static/'
@@ -188,6 +188,7 @@ class MainWindow(QMainWindow):
             url = str(link.get('href'))
             if url is None:
                 continue
+            url = url.rsplit('/')
             if url.startswith(prefixCheck):
                 listURLAll.append(url)
                 if url not in dictURLHistory:
