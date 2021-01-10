@@ -75,8 +75,8 @@ def procHTML(htmlDir,mdDir,htmlFileName):
     title = newMD[0].lstrip('#').strip()
     date = newMD[2].split()[0].strip()
     tag = newMD[4].lstrip('标签：').strip()
-    mdFileName = date+'_'+tag+'_'+title+'.md'
-    mdFileName = re.sub(r'[\\/:*?"<>|\r\n\- ]+', "_", mdFileName)
+    mdFileName = tag + '_' + title + '.md'
+    mdFileName = date + '-' + re.sub(r'[\\/:*?"<>|\r\n\- ]+', "_", mdFileName)
     with open(mdDir+mdFileName, 'w', encoding='utf-8') as wf:
         wf.write('\n'.join(newMD))
 
