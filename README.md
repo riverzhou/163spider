@@ -1,8 +1,7 @@
 # 人生的第一个爬虫程序  
 
-![![](https://img.shields.io/github/v/tag/riverzhou/163spider)](#) 
-![![license](https://img.shields.io/badge/license-GPLv3-green.svg)](#)
-  
+![![Version](https://img.shields.io/github/v/tag/riverzhou/163spider)](#)  ![![License](https://img.shields.io/badge/license-GPLv3-green.svg)](#)
+
 ---
 
 用 PyQt5 的 QWebengine 替代传统的 selenium / puppeteer 做爬虫   
