@@ -1,6 +1,7 @@
 # 人生的第一个爬虫程序  
 
-![![Version](https://img.shields.io/badge/version-v3.3.0-yellow.svg)](#) [![license](https://img.shields.io/badge/license-GPLv3-green.svg)](#)
+![![](https://img.shields.io/github/v/tag/riverzhou/163spider)](#) 
+![![license](https://img.shields.io/badge/license-GPLv3-green.svg)](#)
   
 ---
 
