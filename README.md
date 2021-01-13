@@ -1,5 +1,9 @@
 # 人生的第一个爬虫程序  
 
+[![](https://img.shields.io/badge/version-v1.0.0-yellow.svg)](#) [![license-MIT](https://img.shields.io/badge/license-GPLv3-green.svg)](#)
+  
+---
+
 用 PyQt5 的 QWebengine 替代传统的 selenium / puppeteer 做爬虫   
 效果很不错   
 
